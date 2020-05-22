@@ -2,9 +2,7 @@ using System.Threading.Tasks;
 using AuthenticationManager.Interface;
 using AuthenticationErrorHandling.Response;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 using DAO = AuthenticationDataAccessModel;
 using DTO = AuthenticationDataTransferModel;
@@ -15,13 +13,11 @@ namespace Authentication.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase 
     {
-        private IAuthenticationManager AuthenticationManager { get; set; }
+        private IAuthManager AuthManager { get; set; }
 
-        public AuthenticationController(UserManager<DAO.Account> userManager, SignInManager<DAO.Account> signInManager, 
-            IConfiguration configuration)
+        public AuthenticationController(IAuthManager authManager)
         {
-            AuthenticationManager = new AuthenticationManager.Implementation.AuthenticationManager(userManager, 
-                signInManager, configuration);
+            AuthManager = authManager;
         }
         
         /// <summary>
@@ -41,7 +37,7 @@ namespace Authentication.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] DTO.Registration registrationRequest)
         {
-            var token = await AuthenticationManager.RegisterAccountAsync(registrationRequest);
+            var token = await AuthManager.RegisterAccountAsync(registrationRequest);
             return Ok(new AuthenticationResponse
             {
                 Success = true,
@@ -66,7 +62,7 @@ namespace Authentication.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> LoginUserName([FromBody] DTO.LoginByUserName loginByUserNameRequest)
         {
-            var token = await AuthenticationManager.LoginAccountAsync(loginByUserNameRequest);
+            var token = await AuthManager.LoginAccountAsync(loginByUserNameRequest);
             return Ok(new AuthenticationResponse
             {
                 Success = true,

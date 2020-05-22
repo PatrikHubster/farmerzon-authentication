@@ -4,8 +4,12 @@ using System.Reflection;
 using System.Text;
 using Authentication.Helper;
 using AuthenticationDataAccess.Context;
+using AuthenticationDataAccess.Implementation;
+using AuthenticationDataAccess.Interface;
 using AuthenticationDataAccessModel;
 using AuthenticationErrorHandling;
+using AuthenticationManager.Implementation;
+using AuthenticationManager.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -51,7 +55,7 @@ namespace Authentication
             services.AddMvc(options => { options.Filters.Add(typeof(ValidateModelStateAttribute)); });
             
             // Add authentication database
-            services.AddDbContext<AuthenticationContext>(
+            services.AddDbContextPool<AuthenticationContext>(
                 option => option.UseNpgsql(
                     Configuration.GetConnectionString("Authentication"),
                     x => x.MigrationsAssembly(nameof(Authentication))));
@@ -124,6 +128,14 @@ namespace Authentication
                     }
                 });
             });
+            
+            services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<IAddressRepository, AddressRepository>();
+            services.AddScoped<ICityRepository, CityRepository>();
+            services.AddScoped<ICountryRepository, CountryRepository>();
+            services.AddScoped<IStateRepository, StateRepository>();
+            services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<IAuthManager, AuthManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

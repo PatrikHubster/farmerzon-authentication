@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AuthenticationDataAccess.Interface;
 using AuthenticationErrorHandling.CustomException;
 using AuthenticationManager.Interface;
 using Microsoft.AspNetCore.Identity;
@@ -16,18 +17,30 @@ using DTO = AuthenticationDataTransferModel;
 
 namespace AuthenticationManager.Implementation
 {
-    public class AuthenticationManager : IAuthenticationManager
+    public class AuthManager : IAuthManager
     {
         private UserManager<DAO.Account> UserManager { get; set; }
         private SignInManager<DAO.Account> SignInManager { get; set; }
+        private IAccountRepository AccountRepository { get; set; }
         private IConfiguration Configuration { get; set; }
+        private IAddressRepository AddressRepository { get; set; }
+        private ICityRepository CityRepository { get; set; }
+        private ICountryRepository CountryRepository { get; set; }
+        private IStateRepository StateRepository { get; set; }
 
-        public AuthenticationManager(UserManager<DAO.Account> userManager, SignInManager<DAO.Account> signInManager,
-            IConfiguration configuration)
+        public AuthManager(UserManager<DAO.Account> userManager, SignInManager<DAO.Account> signInManager, 
+            IAccountRepository accountRepository, IConfiguration configuration, ICityRepository cityRepository,
+            IAddressRepository addressRepository, ICountryRepository countryRepository, 
+            IStateRepository stateRepository)
         {
             UserManager = userManager;
             SignInManager = signInManager;
+            AccountRepository = accountRepository;
             Configuration = configuration;
+            AddressRepository = addressRepository;
+            CityRepository = cityRepository;
+            CountryRepository = countryRepository;
+            StateRepository = stateRepository;
         }
 
         private string GenerateAuthenticationToken(DAO.Account account)
@@ -41,8 +54,15 @@ namespace AuthenticationManager.Implementation
                     new Claim(JwtRegisteredClaimNames.Sub, account.NormalizedUserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, account.Email),
-                    new Claim(JwtRegisteredClaimNames.GivenName, account.UserName),
                     new Claim("id", account.Id),
+                    new Claim("username", account.UserName),
+                    new Claim("street", account.Address.Street), 
+                    new Claim("doorNumber", account.Address.DoorNumber),
+                    new Claim("zipCode", account.Address.City.ZipCode),
+                    new Claim("cityName", account.Address.City.Name),
+                    new Claim("countryCode", account.Address.Country.Code),
+                    new Claim("countryName", account.Address.Country.Name), 
+                    new Claim("stateName", account.Address.State.Name)
                 }),
                 
                 Expires = DateTime.Now.AddHours(2),
@@ -54,7 +74,50 @@ namespace AuthenticationManager.Implementation
 
             var token = tokenHandler.CreateToken(tokenDescription);
             return tokenHandler.WriteToken(token);
+        }
 
+        private async Task<DAO.Account> AddAccount(DTO.Registration registration)
+        {
+            var creationResult = await UserManager.CreateAsync(new DAO.Account
+            {
+                UserName = registration.UserName,
+                Email = registration.Email
+            }, registration.Password);
+            
+            if (!creationResult.Succeeded)
+            {
+                throw new BadRequestException(creationResult.Errors.Select(error => error.Description).ToList());
+            }
+            
+            var managedCity = await CityRepository.FindOrInsertCityAsync(new DAO.City
+            {
+                Name = registration.Address.CityName,
+                ZipCode = registration.Address.ZipCode
+            });
+
+            var managedCountry = await CountryRepository.FindOrInsertCountryAsync(new DAO.Country
+            {
+                Code = registration.Address.CountryCode,
+                Name = registration.Address.CountryName
+            });
+
+            var managedState = await StateRepository.FindOrInsertStateAsync(new DAO.State
+            {
+                Name = registration.Address.StateName
+            });
+
+            var managedAddress = await AddressRepository.AddOrUpdateEntityAsync(new DAO.Address
+            {
+                City = managedCity,
+                Country = managedCountry,
+                State = managedState,
+                DoorNumber = registration.Address.DoorNumber,
+                Street = registration.Address.Street
+            });
+
+            var managedAccount = await UserManager.FindByEmailAsync(registration.Email);
+            managedAccount.Address = managedAddress;
+            return await AccountRepository.AddOrUpdateEntityAsync(managedAccount);
         }
 
         public async Task<string> RegisterAccountAsync(DTO.Registration registrationRequest)
@@ -67,7 +130,6 @@ namespace AuthenticationManager.Implementation
             }
             
             var existingUserName = await UserManager.FindByNameAsync(registrationRequest.UserName);
-
             if (existingUserName != null)
             {
                 errors.Add("This username already exists.");
@@ -77,20 +139,8 @@ namespace AuthenticationManager.Implementation
             {
                 throw new BadRequestException(errors);
             }
-            
-            var account = new DAO.Account
-            {
-                UserName = registrationRequest.UserName,
-                Email = registrationRequest.Email
-            };
 
-            var createdUser = await UserManager.CreateAsync(account, 
-                registrationRequest.Password);
-            if (!createdUser.Succeeded)
-            {
-                throw new BadRequestException(createdUser.Errors.Select(error => error.Description).ToList());
-            }
-
+            var account = await AddAccount(registrationRequest);
             return GenerateAuthenticationToken(account);
         }
         

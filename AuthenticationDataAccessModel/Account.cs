@@ -4,6 +4,7 @@ namespace AuthenticationDataAccessModel
 {
     public class Account : IdentityUser
     {
-        // nothing to do here
+        // relationships
+        public Address Address { get; set; }
     }
 }
