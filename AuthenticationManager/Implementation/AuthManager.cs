@@ -146,7 +146,8 @@ namespace AuthenticationManager.Implementation
         
         public async Task<string> LoginAccountAsync(DTO.LoginByUserName loginByUserNameRequest)
         {
-            var existingUser = await UserManager.FindByNameAsync(loginByUserNameRequest.UserName);
+            var existingUser =
+                await AccountRepository.FindAccountByUserNameAsync(loginByUserNameRequest.UserName);
             if (existingUser == null)
             {
                 throw new BadRequestException("An incorrect password or username was used.");
