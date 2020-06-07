@@ -101,31 +101,6 @@ namespace Authentication
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
-
-                // The configuring of the authentication in swagger ui changed in dotnet core 3.1. For more details:
-                // https://stackoverflow.com/questions/58179180/jwt-authentication-and-swagger-with-net-core-3-0
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme.Enter 'Bearer' [space] and then " +
-                                  "your token in the text input below. Example: 'Bearer header.payload.signature'",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] { }
-                    }
-                });
             });
             
             // manager DI container
