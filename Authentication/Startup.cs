@@ -107,9 +107,8 @@ namespace Authentication
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n" +
-                                  "Enter 'Bearer' [space] and then your token in the text input below. \r\n\r\n" +
-                                  "Example: 'Bearer easfsdkk234klf3k234l.klf23l2342l34klf.klfl2l34lkslfdllk34l'",
+                    Description = "JWT Authorization header using the Bearer scheme.Enter 'Bearer' [space] and then " +
+                                  "your token in the text input below. Example: 'Bearer header.payload.signature'",
                     Name = "Authorization",
                     Type = SecuritySchemeType.ApiKey
                 });
@@ -129,13 +128,16 @@ namespace Authentication
                 });
             });
             
+            // manager DI container
+            services.AddScoped<IAuthManager, AuthManager>();
+            
+            // repositories DI container
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<ICityRepository, CityRepository>();
             services.AddScoped<ICountryRepository, CountryRepository>();
             services.AddScoped<IStateRepository, StateRepository>();
             services.AddScoped<IAccountRepository, AccountRepository>();
-            services.AddScoped<IAuthManager, AuthManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
