@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
-using AuthenticationDataAccess.Context;
+using AuthenticationDataAccess;
 using AuthenticationDataAccess.Interface;
 using AuthenticationDataAccessModel;
 using Microsoft.EntityFrameworkCore;

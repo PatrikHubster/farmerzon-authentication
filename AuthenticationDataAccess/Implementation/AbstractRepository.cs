@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using AuthenticationDataAccess.Context;
+using AuthenticationDataAccess;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthenticationDataAccess.Implementation

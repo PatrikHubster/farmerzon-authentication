@@ -2,7 +2,7 @@ using AuthenticationDataAccessModel;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthenticationDataAccess.Context
+namespace AuthenticationDataAccess
 {
     public class AuthenticationContext : IdentityDbContext<Account>
     {
