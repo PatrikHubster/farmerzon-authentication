@@ -7,8 +7,6 @@ using AuthenticationErrorHandling.CustomException;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
-using DTO = AuthenticationDataTransferModel;
-
 namespace AuthenticationErrorHandling
 {
     public class ErrorHandlingMiddleware
