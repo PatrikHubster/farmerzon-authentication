@@ -4,7 +4,6 @@ using AuthenticationErrorHandling.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using DAO = AuthenticationDataAccessModel;
 using DTO = AuthenticationDataTransferModel;
 
 namespace Authentication.Controllers
@@ -21,7 +20,7 @@ namespace Authentication.Controllers
         }
         
         /// <summary>
-        /// Register a new person on this plattform.
+        /// Register a new person on this platform.
         /// </summary>
         /// <param name="registrationRequest">Includes all necessary data to register a new liter.</param>
         /// <returns>
@@ -35,7 +34,7 @@ namespace Authentication.Controllers
         [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Register([FromBody] DTO.Registration registrationRequest)
+        public async Task<IActionResult> RegisterAsync([FromBody] DTO.Registration registrationRequest)
         {
             var token = await AuthManager.RegisterAccountAsync(registrationRequest);
             return Ok(new AuthenticationResponse
@@ -60,7 +59,7 @@ namespace Authentication.Controllers
         [ProducesResponseType(typeof(AuthenticationResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> LoginUserName([FromBody] DTO.LoginByUserName loginByUserNameRequest)
+        public async Task<IActionResult> LoginUserNameAsync([FromBody] DTO.LoginByUserName loginByUserNameRequest)
         {
             var token = await AuthManager.LoginAccountAsync(loginByUserNameRequest);
             return Ok(new AuthenticationResponse
