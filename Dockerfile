@@ -26,5 +26,3 @@ FROM base as final
 WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "Authentication.dll"]
-
-EXPOSE 5000
