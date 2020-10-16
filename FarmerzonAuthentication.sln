@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmerzonAuthentication", "FarmerzonAuthentication\FarmerzonAuthentication.csproj", "{DE9E6A75-4858-476F-869D-C2C1C0C7AADD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmerzonAuthenticationDataAccessModel", "FarmerzonAuthenticationDataAccessModel\FarmerzonAuthenticationDataAccessModel.csproj", "{2795B7EB-3412-4B5E-8D27-4B606DB589B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmerzonAuthenticationDataTransferModel", "FarmerzonAuthenticationDataTransferModel\FarmerzonAuthenticationDataTransferModel.csproj", "{B733B052-04D4-4142-9552-3110CE09EB41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmerzonAuthenticationErrorHandling", "FarmerzonAuthenticationErrorHandling\FarmerzonAuthenticationErrorHandling.csproj", "{54D3AB27-0C0A-40DF-BA3D-1E5316F25D95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmerzonAuthenticationDataAccess", "FarmerzonAuthenticationDataAccess\FarmerzonAuthenticationDataAccess.csproj", "{F1AE8B03-0DAA-421A-BD6F-C3B4031C96CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarmerzonAuthenticationManager", "FarmerzonAuthenticationManager\FarmerzonAuthenticationManager.csproj", "{A2C2090C-C382-4946-8473-E4DD0E8A9735}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE9E6A75-4858-476F-869D-C2C1C0C7AADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE9E6A75-4858-476F-869D-C2C1C0C7AADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE9E6A75-4858-476F-869D-C2C1C0C7AADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE9E6A75-4858-476F-869D-C2C1C0C7AADD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2795B7EB-3412-4B5E-8D27-4B606DB589B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2795B7EB-3412-4B5E-8D27-4B606DB589B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2795B7EB-3412-4B5E-8D27-4B606DB589B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2795B7EB-3412-4B5E-8D27-4B606DB589B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B733B052-04D4-4142-9552-3110CE09EB41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B733B052-04D4-4142-9552-3110CE09EB41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B733B052-04D4-4142-9552-3110CE09EB41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B733B052-04D4-4142-9552-3110CE09EB41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54D3AB27-0C0A-40DF-BA3D-1E5316F25D95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54D3AB27-0C0A-40DF-BA3D-1E5316F25D95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54D3AB27-0C0A-40DF-BA3D-1E5316F25D95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54D3AB27-0C0A-40DF-BA3D-1E5316F25D95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1AE8B03-0DAA-421A-BD6F-C3B4031C96CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1AE8B03-0DAA-421A-BD6F-C3B4031C96CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1AE8B03-0DAA-421A-BD6F-C3B4031C96CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1AE8B03-0DAA-421A-BD6F-C3B4031C96CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2C2090C-C382-4946-8473-E4DD0E8A9735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2C2090C-C382-4946-8473-E4DD0E8A9735}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2C2090C-C382-4946-8473-E4DD0E8A9735}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2C2090C-C382-4946-8473-E4DD0E8A9735}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

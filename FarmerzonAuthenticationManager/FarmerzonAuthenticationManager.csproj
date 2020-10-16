@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\FarmerzonAuthenticationDataAccess\FarmerzonAuthenticationDataAccess.csproj" />
+      <ProjectReference Include="..\FarmerzonAuthenticationDataTransferModel\FarmerzonAuthenticationDataTransferModel.csproj" />
+      <ProjectReference Include="..\FarmerzonAuthenticationErrorHandling\FarmerzonAuthenticationErrorHandling.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Dapr.Client" Version="0.11.0-preview02" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
+    </ItemGroup>
+
+</Project>
