@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapr.Client;
 using Dapr.Client.Http;
+using FarmerzonAuthenticationDataAccess;
 using FarmerzonAuthenticationErrorHandling.CustomException;
 using FarmerzonAuthenticationManager.Interface;
 using Microsoft.AspNetCore.Identity;
@@ -20,35 +21,41 @@ namespace FarmerzonAuthenticationManager.Implementation
 {
     public class AuthenticationManager : IAuthenticationManager
     {
-        private UserManager<DAO.Account> UserManager { get; set; }
-        private SignInManager<DAO.Account> SignInManager { get; set; }
+        private UserManager<IdentityUser> UserManager { get; set; }
+        private SignInManager<IdentityUser> SignInManager { get; set; }
         private DaprClient DaprClient { get; set; }
         private IConfiguration Configuration { get; set; }
+        private TokenValidationParameters ValidationParameters { get; set; }
+        private FarmerzonAuthenticationContext Context { get; set; }
 
-        public AuthenticationManager(UserManager<DAO.Account> userManager, SignInManager<DAO.Account> signInManager, 
-            DaprClient daprClient, IConfiguration configuration)
+        public AuthenticationManager(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, 
+            DaprClient daprClient, IConfiguration configuration, TokenValidationParameters validationParameters, 
+            FarmerzonAuthenticationContext context)
         {
             UserManager = userManager;
             SignInManager = signInManager;
             DaprClient = daprClient;
             Configuration = configuration;
+            ValidationParameters = validationParameters;
+            Context = context;
         }
 
-        private string GenerateAuthenticationToken(string normalizedUserName, string userName, string email)
+        private async Task<DTO.TokenOutput> GenerateAuthenticationTokenAsync(IdentityUser user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]);
             var tokenDescription = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
+                Subject = new ClaimsIdentity(new []
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, normalizedUserName),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.NormalizedUserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.Email, email),
-                    new Claim("username", userName)
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim("id", user.Id), 
+                    new Claim("username", user.UserName)
                 }),
                 
-                Expires = DateTime.Now.AddHours(2),
+                Expires = DateTime.UtcNow.Add(new TimeSpan(0, 30, 0)),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature),
                 Issuer = Configuration["Jwt:Issuer"],
@@ -56,10 +63,25 @@ namespace FarmerzonAuthenticationManager.Implementation
             };
 
             var token = tokenHandler.CreateToken(tokenDescription);
-            return tokenHandler.WriteToken(token);
+            var refreshToken = new DAO.RefreshToken
+            {
+                JwtId = token.Id,
+                UserId = user.Id,
+                CreationDate = DateTime.UtcNow,
+                ExpirationDate = DateTime.UtcNow.AddMonths(6)
+            };
+
+            await Context.RefreshTokens.AddAsync(refreshToken);
+            await Context.SaveChangesAsync();
+            
+            return new DTO.TokenOutput
+            {
+                Token = tokenHandler.WriteToken(token),
+                RefreshToken = refreshToken.Token
+            };
         }
 
-        public async Task<string> RegisterAccountAsync(DTO.RegistrationInput registration)
+        public async Task<DTO.TokenOutput> RegisterUserAsync(DTO.RegistrationInput registration)
         {
             var errors = new List<string>();
             var existingEmail = await UserManager.FindByEmailAsync(registration.Email);
@@ -79,7 +101,7 @@ namespace FarmerzonAuthenticationManager.Implementation
                 throw new BadRequestException(errors);
             }
 
-            var result = await UserManager.CreateAsync(new DAO.Account
+            var result = await UserManager.CreateAsync(new IdentityUser
             {
                 UserName = registration.UserName,
                 Email = registration.Email
@@ -91,23 +113,22 @@ namespace FarmerzonAuthenticationManager.Implementation
             }
 
             var insertedUser = await UserManager.FindByNameAsync(registration.UserName);
-            var token = GenerateAuthenticationToken(insertedUser.NormalizedUserName, insertedUser.UserName,
-                insertedUser.Email);
+            var tokenResult = await GenerateAuthenticationTokenAsync(insertedUser);
             
             var httpExtension = new HTTPExtension
             {
                 ContentType = "application/json", 
                 Verb = HTTPVerb.Post
             };
-            httpExtension.Headers.Add("Authorization", $"Bearer {token}");
+            httpExtension.Headers.Add("Authorization", $"Bearer {tokenResult.Token}");
 
             _ = DaprClient.InvokeMethodAsync<DTO.AddressInput, DTO.AddressOutput>(
                 "farmerzon-address", "address", registration.Address, httpExtension);
 
-            return token;
+            return tokenResult;
         }
         
-        public async Task<string> LoginAccountAsync(DTO.UserNameLoginInput userNameLogin)
+        public async Task<DTO.TokenOutput> LoginUserAsync(DTO.UserNameLoginInput userNameLogin)
         {
             var existingUser = await UserManager.FindByNameAsync(userNameLogin.UserName);
             if (existingUser == null)
@@ -122,8 +143,86 @@ namespace FarmerzonAuthenticationManager.Implementation
                 throw new BadRequestException("An incorrect password or username was used.");
             }
 
-            return GenerateAuthenticationToken(existingUser.NormalizedUserName, existingUser.UserName,
-                existingUser.Email);
+            return await GenerateAuthenticationTokenAsync(existingUser);
+        }
+
+        private ClaimsPrincipal GetClaimsPrincipalFromToken(string token)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var principle = tokenHandler.ValidateToken(token, ValidationParameters, out var validatedToken);
+                return IsJwtWithValidSecurityAlgorithm(validatedToken) ? principle : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static bool IsJwtWithValidSecurityAlgorithm(SecurityToken securityToken)
+        {
+            return securityToken is JwtSecurityToken jwtSecurityToken && jwtSecurityToken.Header.Alg.Equals(
+                SecurityAlgorithms.HmacSha256, StringComparison.InvariantCulture);
+        }
+        
+        public async Task<DTO.TokenOutput> RefreshTokenAsync(DTO.RefreshTokenInput refreshToken)
+        {
+            var validatedToken = GetClaimsPrincipalFromToken(refreshToken.Token);
+            if (validatedToken == null)
+            {
+                throw new UnautherizedException("Invalid token.");
+            }
+
+            var expirationDateUnix =
+                long.Parse(validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+            var expirationDateTimeUtc =
+                new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(expirationDateUnix);
+
+            if (expirationDateTimeUtc > DateTime.UtcNow)
+            {
+                throw new UnautherizedException("This token is still valid.");
+            }
+            
+            var storedRefreshToken = Context.RefreshTokens.SingleOrDefault(rt => rt.Token == refreshToken.RefreshToken);
+            if (storedRefreshToken == null)
+            {
+                throw new UnautherizedException("This token does not exist.");
+            }
+            
+            var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+            var errors = new List<string>();
+            if (DateTime.UtcNow > storedRefreshToken.ExpirationDate)
+            {
+                errors.Add("This refresh token has expired.");
+            }
+
+            if (storedRefreshToken.Invalidated)
+            {
+                errors.Add("This refresh token has been invalidated.");
+            }
+
+            if (storedRefreshToken.Used)
+            {
+                errors.Add("This refresh token has been used.");
+            }
+
+            if (storedRefreshToken.JwtId != jti)
+            {
+                errors.Add("This refresh token does not match this jwt token.");
+            }
+
+            if (errors.Count != 0)
+            {
+                throw new UnautherizedException(errors);
+            }
+
+            storedRefreshToken.Used = true;
+            Context.RefreshTokens.Update(storedRefreshToken);
+            await Context.SaveChangesAsync();
+            
+            var user = await UserManager.FindByIdAsync(validatedToken.Claims.Single(x => x.Type == "id").Value);
+            return await GenerateAuthenticationTokenAsync(user);
         }
     }
 }

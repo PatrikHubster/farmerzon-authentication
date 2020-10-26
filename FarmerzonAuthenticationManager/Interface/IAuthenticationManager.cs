@@ -6,7 +6,8 @@ namespace FarmerzonAuthenticationManager.Interface
 {
     public interface IAuthenticationManager
     {
-        Task<string> RegisterAccountAsync(DTO.RegistrationInput registration);
-        Task<string> LoginAccountAsync(DTO.UserNameLoginInput userNameLogin);
+        Task<DTO.TokenOutput> RegisterUserAsync(DTO.RegistrationInput registration);
+        Task<DTO.TokenOutput> LoginUserAsync(DTO.UserNameLoginInput userNameLogin);
+        Task<DTO.TokenOutput> RefreshTokenAsync(DTO.RefreshTokenInput refreshToken);
     }
 }

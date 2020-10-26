@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.Json;
 using FarmerzonAuthentication.Helper;
 using FarmerzonAuthenticationDataAccess;
-using FarmerzonAuthenticationDataAccessModel;
 using FarmerzonAuthenticationErrorHandling;
 using FarmerzonAuthenticationManager.Implementation;
 using FarmerzonAuthenticationManager.Interface;
@@ -57,7 +56,7 @@ namespace FarmerzonAuthentication
                     x => x.MigrationsAssembly(nameof(FarmerzonAuthentication))));
             
             // Add authentication service
-            services.AddIdentity<Account, IdentityRole>(options =>
+            services.AddIdentity<IdentityUser, IdentityRole>(options =>
                 {
                     // Lockout settings after 
                     options.Lockout.AllowedForNewUsers = true;
@@ -67,6 +66,19 @@ namespace FarmerzonAuthentication
                 .AddEntityFrameworkStores<FarmerzonAuthenticationContext>()
                 .AddDefaultTokenProviders();
 
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = Configuration["Jwt:Issuer"],
+                ValidAudience = Configuration["Jwt:Issuer"],
+                RequireExpirationTime = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
+            };
+            services.AddSingleton(tokenValidationParameters);
+            
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -75,17 +87,7 @@ namespace FarmerzonAuthentication
             }).AddJwtBearer(options =>
             {
                 options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = Configuration["Jwt:Issuer"],
-                    ValidAudience = Configuration["Jwt:Issuer"],
-                    RequireExpirationTime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
-                };
+                options.TokenValidationParameters = tokenValidationParameters;
             });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
