@@ -18,17 +18,6 @@ namespace FarmerzonAuthentication.Controllers
             AuthManager = authManager;
         }
         
-        /// <summary>
-        /// Register a new person on this platform.
-        /// </summary>
-        /// <param name="registration">Includes all necessary data to register a new person.</param>
-        /// <returns>
-        /// A bad request if the data aren't valid, an ok message if everything was fine or an internal server error if
-        /// something went wrong.
-        /// </returns>
-        /// <response code="200">Person was created successfully</response>
-        /// <response code="400">Person data wasn't valid.</response>
-        /// <response code="500">Something unexpected happened.</response>
         [HttpPost("register")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -43,17 +32,6 @@ namespace FarmerzonAuthentication.Controllers
             });
         }  
         
-        /// <summary>
-        /// This endpoint is for logging in a person.
-        /// </summary>
-        /// <param name="userNameLogin">Includes all necessary data to login a new person.</param>
-        /// <returns>
-        /// Unauthorized if the data aren't valid, an ok message if username and password are correct or a internal
-        /// server error if something went wrong.
-        /// </returns>
-        /// <response code="200">Person was logged in successfully</response>
-        /// <response code="400">Person data weren't valid.</response>
-        /// <response code="500">Something unexpected happened.</response>
         [HttpPost("login-username")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -68,18 +46,7 @@ namespace FarmerzonAuthentication.Controllers
                 Content = token
             });
         }
-
-        /// <summary>
-        /// This endpoint is for refreshing a token.
-        /// </summary>
-        /// <param name="refreshToken">Includes all necessary data to refresh a users token.</param>
-        /// <returns>
-        /// Unauthorized if the data aren't valid, an ok message if the token is valid or a internal
-        /// server error if something went wrong.
-        /// </returns>
-        /// <response code="200">Token was refreshed successfully.</response>
-        /// <response code="400">Token data weren't valid.</response>
-        /// <response code="500">Something unexpected happened.</response>
+        
         [HttpPost("refresh")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
