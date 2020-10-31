@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using FarmerzonAuthenticationManager.Interface;
 using Microsoft.AspNetCore.Http;
@@ -40,7 +39,6 @@ namespace FarmerzonAuthentication.Controllers
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> LoginUserNameAsync([FromBody] DTO.UserNameLoginInput userNameLogin)
         {
-            throw new NullReferenceException("This is a message.");
             var token = await AuthManager.LoginUserAsync(userNameLogin);
             return Ok(new DTO.SuccessResponse<DTO.TokenOutput>()
             {
