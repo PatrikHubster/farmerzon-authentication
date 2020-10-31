@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using FarmerzonAuthenticationManager.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 using DTO = FarmerzonAuthenticationDataTransferModel;
 
@@ -9,15 +10,19 @@ namespace FarmerzonAuthentication.Controllers
 {
     [Route("authentication")]
     [ApiController]
-    public class AuthenticationController : ControllerBase 
+    public class AuthenticationController : ControllerBase
     {
         private IAuthenticationManager AuthManager { get; set; }
+        private ILogger<AuthenticationController> Logger { get; set; }
 
-        public AuthenticationController(IAuthenticationManager authManager)
+        public AuthenticationController(IAuthenticationManager authManager, ILogger<AuthenticationController> logger)
         {
             AuthManager = authManager;
+            Logger = logger;
+
+            Logger.LogInformation($"Initialized {nameof(AuthenticationController)} successfully.");
         }
-        
+
         [HttpPost("register")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -30,8 +35,8 @@ namespace FarmerzonAuthentication.Controllers
                 Success = true,
                 Content = token
             });
-        }  
-        
+        }
+
         [HttpPost("login-username")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -46,7 +51,7 @@ namespace FarmerzonAuthentication.Controllers
                 Content = token
             });
         }
-        
+
         [HttpPost("refresh")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
