@@ -1,8 +1,8 @@
+using System;
 using System.Threading.Tasks;
 using FarmerzonAuthenticationManager.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 using DTO = FarmerzonAuthenticationDataTransferModel;
 
@@ -13,14 +13,10 @@ namespace FarmerzonAuthentication.Controllers
     public class AuthenticationController : ControllerBase
     {
         private IAuthenticationManager AuthManager { get; set; }
-        private ILogger<AuthenticationController> Logger { get; set; }
 
-        public AuthenticationController(IAuthenticationManager authManager, ILogger<AuthenticationController> logger)
+        public AuthenticationController(IAuthenticationManager authManager)
         {
             AuthManager = authManager;
-            Logger = logger;
-
-            Logger.LogInformation($"Initialized {nameof(AuthenticationController)} successfully.");
         }
 
         [HttpPost("register")]
@@ -44,6 +40,7 @@ namespace FarmerzonAuthentication.Controllers
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> LoginUserNameAsync([FromBody] DTO.UserNameLoginInput userNameLogin)
         {
+            throw new NullReferenceException("This is a message.");
             var token = await AuthManager.LoginUserAsync(userNameLogin);
             return Ok(new DTO.SuccessResponse<DTO.TokenOutput>()
             {

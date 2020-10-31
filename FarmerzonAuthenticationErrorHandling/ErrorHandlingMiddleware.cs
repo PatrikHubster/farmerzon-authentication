@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FarmerzonAuthenticationDataTransferModel;
 using FarmerzonAuthenticationErrorHandling.CustomException;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
  namespace FarmerzonAuthenticationErrorHandling
@@ -12,10 +13,12 @@ using Newtonsoft.Json;
     public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ErrorHandlingMiddleware> _logger;
 
-        public ErrorHandlingMiddleware(RequestDelegate next)
+        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
@@ -26,11 +29,12 @@ using Newtonsoft.Json;
             }
             catch (Exception exp)
             {
-                await HandleExceptionAsync(context, exp);
+                await HandleExceptionAsync(context, exp, _logger);
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exp)
+        private static Task HandleExceptionAsync(HttpContext context, Exception exp, 
+            ILogger<ErrorHandlingMiddleware> logger)
         {
             HttpStatusCode code;
             var resultMessage = new ErrorResponse
@@ -55,6 +59,7 @@ using Newtonsoft.Json;
                 default:
                     code = HttpStatusCode.InternalServerError; // HTTP 500
                     resultMessage.Errors = new List<string> {"Ooops, something went wrong."};
+                    logger.LogError(exp, "This error was captured by the error handling middleware.");
                     break;
             }
 

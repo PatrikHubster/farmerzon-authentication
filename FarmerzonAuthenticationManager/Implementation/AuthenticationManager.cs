@@ -12,7 +12,6 @@ using FarmerzonAuthenticationErrorHandling.CustomException;
 using FarmerzonAuthenticationManager.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 using DAO = FarmerzonAuthenticationDataAccessModel;
@@ -28,11 +27,10 @@ namespace FarmerzonAuthenticationManager.Implementation
         private IConfiguration Configuration { get; set; }
         private TokenValidationParameters ValidationParameters { get; set; }
         private FarmerzonAuthenticationContext Context { get; set; }
-        private ILogger<AuthenticationManager> Logger { get; set; }
 
         public AuthenticationManager(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, 
             DaprClient daprClient, IConfiguration configuration, TokenValidationParameters validationParameters, 
-            FarmerzonAuthenticationContext context, ILogger<AuthenticationManager> logger)
+            FarmerzonAuthenticationContext context)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -40,9 +38,6 @@ namespace FarmerzonAuthenticationManager.Implementation
             Configuration = configuration;
             ValidationParameters = validationParameters;
             Context = context;
-            Logger = logger;
-            
-            Logger.LogInformation($"Initialized {nameof(AuthenticationManager)} successfully.");
         }
 
         private async Task<DTO.TokenOutput> GenerateAuthenticationTokenAsync(IdentityUser user)
