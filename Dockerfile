@@ -7,15 +7,15 @@ FROM base AS builder
 ARG Configuration=Release
 WORKDIR /src
 COPY *.sln ./
-COPY ./Authentication/*.csproj Authentication/
-COPY ./AuthenticationDataAccess/*.csproj AuthenticationDataAccess/
-COPY ./AuthenticationDataAccessModel/*.csproj AuthenticationDataAccessModel/
-COPY ./AuthenticationDataTransferModel/*.csproj AuthenticationDataTransferModel/
-COPY ./AuthenticationErrorHandling/*.csproj  AuthenticationErrorHandling/
-COPY ./AuthenticationManager/*.csproj AuthenticationManager/
+COPY ./FarmerzonAuthentication/*.csproj FarmerzonAuthentication/
+COPY ./FarmerzonAuthenticationDataAccess/*.csproj FarmerzonAuthenticationDataAccess/
+COPY ./FarmerzonAuthenticationDataAccessModel/*.csproj FarmerzonAuthenticationDataAccessModel/
+COPY ./FarmerzonAuthenticationDataTransferModel/*.csproj FarmerzonAuthenticationDataTransferModel/
+COPY ./FarmerzonAuthenticationErrorHandling/*.csproj  FarmerzonAuthenticationErrorHandling/
+COPY ./FarmerzonAuthenticationManager/*.csproj FarmerzonAuthenticationManager/
 RUN dotnet restore --verbosity detailed
 COPY . .
-WORKDIR /src/Authentication
+WORKDIR /src/FarmerzonAuthentication
 RUN dotnet build -c $Configuration -o /app
 
 FROM builder AS publish
@@ -25,4 +25,4 @@ RUN dotnet publish -c $Configuration -o /app
 FROM base as final
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "Authentication.dll"]
+ENTRYPOINT ["dotnet", "FarmerzonAuthentication.dll"]
