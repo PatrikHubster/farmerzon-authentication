@@ -1,4 +1,5 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:latest AS base
+ARG IMAGE=latest
+FROM mcr.microsoft.com/dotnet/core/sdk:${IMAGE} AS base
 WORKDIR /app
 ENV ASPNETCORE_ENVIRONMENT Production
 ENV ASPNETCORE_URLS http://*:5000
