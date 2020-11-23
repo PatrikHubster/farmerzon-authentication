@@ -3,11 +3,13 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using AutoMapper;
 using FarmerzonAuthentication.Helper;
 using FarmerzonAuthenticationDataAccess;
 using FarmerzonAuthenticationErrorHandling;
 using FarmerzonAuthenticationManager.Implementation;
 using FarmerzonAuthenticationManager.Interface;
+using FarmerzonAuthenticationManager.Mapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -90,6 +92,13 @@ namespace FarmerzonAuthentication
                 options.TokenValidationParameters = tokenValidationParameters;
             });
 
+            // Adds the mapper for the business logic
+            services.AddAutoMapper(Assembly.GetAssembly(typeof(MappingProfile)));
+            
+            // manager DI container
+            services.AddScoped<IAuthenticationManager, AuthenticationManager>();
+            services.AddScoped<IPersonManager, PersonManager>();
+            
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
@@ -99,10 +108,32 @@ namespace FarmerzonAuthentication
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
+
+                // The configuring of the authentication in swagger ui changed in dotnet core 3.1. For more details:
+                // https://stackoverflow.com/questions/58179180/jwt-authentication-and-swagger-with-net-core-3-0
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme.Enter 'Bearer' [space] and then " +
+                                  "your token in the text input below. Example: 'Bearer header.payload.signature'",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
             });
-            
-            // manager DI container
-            services.AddScoped<IAuthenticationManager, AuthenticationManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

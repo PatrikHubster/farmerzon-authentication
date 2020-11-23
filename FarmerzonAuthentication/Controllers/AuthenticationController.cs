@@ -32,7 +32,7 @@ namespace FarmerzonAuthentication.Controllers
             });
         }
 
-        [HttpPost("login-username")]
+        [HttpPost("login-user-name")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status401Unauthorized)]
