@@ -26,15 +26,26 @@ namespace FarmerzonAuthentication
 {
     public class Startup
     {
+        private const string CorsPolicy = "allowedOrigins";
+        private IConfiguration Configuration { get; }
+        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        private IConfiguration Configuration { get; }
-
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(c => 
+            {
+                c.AddPolicy(CorsPolicy,
+                    builder =>
+                    {
+                        builder.WithOrigins(Configuration.GetSection("AllowedOrigins").Get<string[]>())
+                            .AllowAnyHeader();
+                    });
+            });
+
             services.AddControllers().AddDapr();
             
             services.AddSingleton(new JsonSerializerOptions
@@ -162,6 +173,7 @@ namespace FarmerzonAuthentication
             }
 
             app.UseRouting();
+            app.UseCors(CorsPolicy);
             app.UseCloudEvents();
 
             // It is important to use app.UseAuthentication(); before app.UseAuthorization();

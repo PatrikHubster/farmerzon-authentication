@@ -31,7 +31,7 @@ namespace FarmerzonAuthentication.Controllers
                 Content = token
             });
         }
-
+        
         [HttpPost("login-user-name")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -46,7 +46,7 @@ namespace FarmerzonAuthentication.Controllers
                 Content = token
             });
         }
-
+        
         [HttpPost("refresh")]
         [ProducesResponseType(typeof(DTO.SuccessResponse<DTO.TokenOutput>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DTO.ErrorResponse), StatusCodes.Status400BadRequest)]
