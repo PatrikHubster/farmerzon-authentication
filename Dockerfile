@@ -14,7 +14,7 @@ COPY ./FarmerzonAuthenticationDataAccessModel/*.csproj FarmerzonAuthenticationDa
 COPY ./FarmerzonAuthenticationDataTransferModel/*.csproj FarmerzonAuthenticationDataTransferModel/
 COPY ./FarmerzonAuthenticationErrorHandling/*.csproj  FarmerzonAuthenticationErrorHandling/
 COPY ./FarmerzonAuthenticationManager/*.csproj FarmerzonAuthenticationManager/
-RUN dotnet restore --verbosity detailed
+RUN dotnet restore --verbosity quiet
 COPY . .
 WORKDIR /src/FarmerzonAuthentication
 RUN dotnet build -c $Configuration -o /app
