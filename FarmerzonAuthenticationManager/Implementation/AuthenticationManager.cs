@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Dapr.Client;
-using Dapr.Client.Http;
 using FarmerzonAuthenticationDataAccess;
 using FarmerzonAuthenticationErrorHandling.CustomException;
 using FarmerzonAuthenticationManager.Interface;
@@ -114,16 +113,19 @@ namespace FarmerzonAuthenticationManager.Implementation
 
             var insertedUser = await UserManager.FindByNameAsync(registration.UserName);
             var tokenResult = await GenerateAuthenticationTokenAsync(insertedUser);
-            
-            var httpExtension = new HTTPExtension
+
+            var addressWithUser = new DTO.AddressWithUserInput
             {
-                ContentType = "application/json", 
-                Verb = HTTPVerb.Post
+                UserName = insertedUser.UserName,
+                NormalizedUserName = insertedUser.NormalizedUserName,
+                City = registration.Address.City,
+                Country = registration.Address.Country,
+                State = registration.Address.State,
+                DoorNumber = registration.Address.DoorNumber,
+                Street = registration.Address.Street,
             };
-            httpExtension.Headers.Add("Authorization", $"Bearer {tokenResult.Token}");
             
-            _ = DaprClient.InvokeMethodAsync<DTO.AddressInput, DTO.SuccessResponse<DTO.AddressOutput>>(
-                "farmerzon-address", "address", registration.Address, httpExtension);
+            _ = DaprClient.PublishEventAsync("pubsub", "address", addressWithUser);
 
             return tokenResult;
         }
